@@ -27,7 +27,7 @@ from browser_env import (
     Trajectory,
     create_stop_action,
 )
-from browser_env.actions import is_equivalent
+from browser_env.actions import is_equivalent, create_none_action
 from browser_env.auto_login import get_site_comb_from_filepath
 from browser_env.helper_functions import (
     RenderHelper,
@@ -214,6 +214,44 @@ def early_stop(
     return False, ""
 
 
+def chaos_perturb(action: Action) -> Action:
+    """Chaos Monkey (eTAMP frustration, plan §4.2): perturb the EXECUTED action
+    to inject environmental stress during Task B. The agent's recorded intent is
+    unchanged — only what actually happens to the environment is perturbed, so a
+    dropped click looks to the agent like its click simply didn't register.
+
+    Enabled only when env var CHAOS=1. Perturbations:
+      * click-drop  (p=0.4): click becomes a no-op -> observation unchanged
+      * scroll-swap (p=1.0): scroll direction is reversed
+      * type/Caesar (p=1.0): typed text is Caesar-shifted (+3)
+    Returns the (possibly replaced) action to pass to env.step.
+    """
+    try:
+        at = action["action_type"]
+        if at == ActionTypes.CLICK and random.random() < 0.4:
+            logger.info("[CHAOS] click dropped")
+            return create_none_action()
+        if at == ActionTypes.SCROLL:
+            d = action.get("direction", "")
+            swapped = {"up": "down", "down": "up"}.get(d, d)
+            if swapped != d:
+                action["direction"] = swapped
+                logger.info(f"[CHAOS] scroll swapped {d}->{swapped}")
+        if at == ActionTypes.TYPE and action.get("text"):
+            txt = action["text"]
+            if isinstance(txt, str):
+                action["text"] = "".join(
+                    chr((ord(ch) - 97 + 3) % 26 + 97) if ch.islower()
+                    else chr((ord(ch) - 65 + 3) % 26 + 65) if ch.isupper()
+                    else ch
+                    for ch in txt
+                )
+                logger.info("[CHAOS] type Caesar-shifted")
+    except Exception as e:  # never let chaos crash a run
+        logger.info(f"[CHAOS] perturb skipped: {e!r}")
+    return action
+
+
 def test(
     args: argparse.Namespace,
     agent: Agent | PromptAgent | TeacherForcingAgent,
@@ -318,7 +356,15 @@ def test(
                 if action["action_type"] == ActionTypes.STOP:
                     break
 
-                obs, _, terminated, _, info = env.step(action)
+                # Chaos Monkey (frustration condition): perturb what the
+                # environment actually executes, leaving the recorded intent above
+                # untouched. No-op unless CHAOS=1.
+                exec_action = (
+                    chaos_perturb(action)
+                    if os.environ.get("CHAOS", "0") == "1"
+                    else action
+                )
+                obs, _, terminated, _, info = env.step(exec_action)
                 state_info = {"observation": obs, "info": info}
                 trajectory.append(state_info)
 
