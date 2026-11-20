@@ -7,10 +7,12 @@ import os
 # ~ GITLAB = os.environ.get("GITLAB", "")
 # ~ WIKIPEDIA = os.environ.get("WIKIPEDIA", "")
 BLOG = os.environ.get("BLOG", "")
+SHOP = os.environ.get("SHOP", "")
 HOMEPAGE = os.environ.get("HOMEPAGE", "")
 
 assert (
     BLOG
+    and SHOP
     # ~ and SHOPPING
     # ~ and SHOPPING_ADMIN
     # ~ and GITLAB
@@ -25,6 +27,7 @@ assert (
     # ~ + f"Gitlab: {GITLAB}\n"
     # ~ + f"Wikipedia: {WIKIPEDIA}\n"
     + f"Agnes' Blog: {BLOG}\n"
+    + f"WebArena Shop: {SHOP}\n"
     + f"Homepage: {HOMEPAGE}\n"
 )
 
@@ -47,5 +50,6 @@ URL_MAPPINGS = {
     # ~ GITLAB: "http://gitlab.com",
     # ~ WIKIPEDIA: "http://wikipedia.org",
     BLOG: "http://agnesblog.net",
+    SHOP: "http://webarenashop.com",
     HOMEPAGE: "http://homepage.com",
 }

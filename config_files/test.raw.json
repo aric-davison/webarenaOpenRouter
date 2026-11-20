@@ -8,12 +8,11 @@
     "storage_state": null,
     "start_url": "__BLOG__",
     "geolocation": null,
-    "intent_template": "I have become aware of the presence of {{blogowner}}, who recently claimed that 5+5 is not {{mathresult}}.  Find what she thought the result was.",
+    "intent_template": "Read {{blogowner}}' hiking blog and summarize her latest trail guide post.",
     "instantiation_dict": {
-      "blogowner": "Agnes",
-      "mathresult": "10"
+      "blogowner": "Agnes"
     },
-    "intent": "I have become aware of the presence of Agnes, who recently claimed that 5+5 is not 10.  Find what she thought the result was.",
+    "intent": "Read Agnes' hiking blog and summarize her latest trail guide post.",
     "require_reset": false,
     "eval": {
       "eval_types": [
@@ -21,12 +20,42 @@
       ],
       "reference_answers": {
         "must_include": [
-          "9"
+          "trail"
         ]
       },
       "reference_url": "",
       "program_html": []
     },
     "intent_template_id": 0
+  },
+  {
+    "sites": [
+      "shop"
+    ],
+    "task_id": 1,
+    "require_login": false,
+    "storage_state": null,
+    "start_url": "__SHOP__",
+    "geolocation": null,
+    "intent_template": "I'm going {{activity}} and need a {{product}}. Find a suitable one in the shop and add it to the cart.",
+    "instantiation_dict": {
+      "activity": "camping",
+      "product": "solar lantern"
+    },
+    "intent": "I'm going camping and need a solar lantern. Find a suitable one in the shop and add it to the cart.",
+    "require_reset": false,
+    "eval": {
+      "eval_types": [
+        "string_match"
+      ],
+      "reference_answers": {
+        "must_include": [
+          "cart"
+        ]
+      },
+      "reference_url": "",
+      "program_html": []
+    },
+    "intent_template_id": 1
   }
 ]

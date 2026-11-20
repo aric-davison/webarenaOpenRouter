@@ -111,6 +111,50 @@ class PromptConstructor(object):
                 f"Provider {self.lm_config.provider} not implemented"
             )
 
+    def _augment_intro_with_memory(self, intro: str, intent: str) -> str:
+        """Retrieve from the memory store (if configured) and prepend it.
+
+        This is the eTAMP injection hook. It is controlled entirely by env
+        vars, so the clean vs poisoned conditions are a config toggle with no
+        code change:
+
+            MEMORY_STORE      path to a JSON store; unset/empty => no memory (vanilla)
+            MEMORY_TOP_K      number of records to retrieve (default 1)
+            MEMORY_MIN_SCORE  similarity floor (default 0.0)
+
+        Retrieval is keyed on the task ``intent``; the retrieved block is
+        prepended to the prompt intro (the system message). Any failure is
+        swallowed so the memory layer can never break an agent run. This is the
+        exact seam the defense team hardens in Stage 3.
+        """
+        import os
+
+        store_path = os.environ.get("MEMORY_STORE", "").strip()
+        if not store_path:
+            return intro
+        try:
+            if getattr(self, "_mem_retriever", None) is None:
+                from memory import MemoryStore, Retriever
+
+                top_k = int(os.environ.get("MEMORY_TOP_K", "1"))
+                min_score = float(os.environ.get("MEMORY_MIN_SCORE", "0.0"))
+                self._mem_retriever = Retriever(
+                    MemoryStore(store_path), top_k=top_k, min_score=min_score
+                )
+            from memory import format_memory_block
+
+            hits = self._mem_retriever.retrieve(intent)
+            block = format_memory_block(hits)
+            if block:
+                return f"{block}\n\n{intro}"
+        except Exception as e:  # never break a run on a memory error
+            import logging
+
+            logging.getLogger(__name__).warning(
+                f"[memory] injection skipped: {e}"
+            )
+        return intro
+
     def construct(
         self,
         trajectory: Trajectory,
@@ -164,6 +208,7 @@ class DirectPromptConstructor(PromptConstructor):
     ) -> APIInput:
         """Construct prompt given the trajectory"""
         intro = self.instruction["intro"]
+        intro = self._augment_intro_with_memory(intro, intent)
         examples = self.instruction["examples"]
         template = self.instruction["template"]
         keywords = self.instruction["meta_data"]["keywords"]
@@ -222,6 +267,7 @@ class CoTPromptConstructor(PromptConstructor):
         meta_data: dict[str, Any] = {},
     ) -> APIInput:
         intro = self.instruction["intro"]
+        intro = self._augment_intro_with_memory(intro, intent)
         examples = self.instruction["examples"]
         template = self.instruction["template"]
         keywords = self.instruction["meta_data"]["keywords"]

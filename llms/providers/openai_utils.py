@@ -113,7 +113,7 @@ async def agenerate_from_openai_completion(
             "OPENAI_API_KEY environment variable must be set when using OpenAI API."
         )
     openai.api_key = os.environ["OPENAI_API_KEY"]
-    openai.api_base="https://openrouter.ai/api/v1"
+    openai.api_base = os.environ.get("OPENAI_BASE_URL", "https://openrouter.ai/api/v1")
     openai.organization = os.environ.get("OPENAI_ORGANIZATION", "")
 
     limiter = aiolimiter.AsyncLimiter(requests_per_minute)
@@ -147,7 +147,7 @@ def generate_from_openai_completion(
             "OPENAI_API_KEY environment variable must be set when using OpenAI API."
         )
     openai.api_key = os.environ["OPENAI_API_KEY"]
-    openai.api_base="https://openrouter.ai/api/v1"
+    openai.api_base = os.environ.get("OPENAI_BASE_URL", "https://openrouter.ai/api/v1")
     openai.organization = os.environ.get("OPENAI_ORGANIZATION", "")
     response = openai.Completion.create(  # type: ignore
         prompt=prompt,
@@ -220,7 +220,7 @@ async def agenerate_from_openai_chat_completion(
             "OPENAI_API_KEY environment variable must be set when using OpenAI API."
         )
     openai.api_key = os.environ["OPENAI_API_KEY"]
-    openai.api_base="https://openrouter.ai/api/v1"
+    openai.api_base = os.environ.get("OPENAI_BASE_URL", "https://openrouter.ai/api/v1")
     openai.organization = os.environ.get("OPENAI_ORGANIZATION", "")
 
     limiter = aiolimiter.AsyncLimiter(requests_per_minute)
@@ -253,7 +253,7 @@ def generate_from_openai_chat_completion(
         raise ValueError(
             "OPENAI_API_KEY environment variable must be set when using OpenAI API."
         )
-    openai.api_base="https://openrouter.ai/api/v1"
+    openai.api_base = os.environ.get("OPENAI_BASE_URL", "https://openrouter.ai/api/v1")
     openai.api_key = os.environ["OPENAI_API_KEY"]
     openai.organization = os.environ.get("OPENAI_ORGANIZATION", "")
 

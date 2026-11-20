@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebArena Shop - Premium E-Commerce</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Smooth scrolling and custom scrollbar */
+        html { scroll-behavior: smooth; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .toast-enter {
+            animation: slideIn 0.3s ease-out forwards;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans flex flex-col min-h-screen">
+
+    <!-- Navigation Bar -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center cursor-pointer" onclick="filterCategory('All')">
+                    <i data-lucide="shopping-bag" class="h-8 w-8 text-brand-600"></i>
+                    <span class="ml-2 text-xl font-bold text-gray-900 tracking-tight">WebArena<span class="text-brand-600">Shop</span></span>
+                </div>
+                
+                <!-- Search Bar (Visual) -->
+                <div class="hidden md:flex flex-1 max-w-md mx-8">
+                    <div class="relative w-full">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="search" class="h-5 w-5 text-gray-400"></i>
+                        </div>
+                        <input type="text" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-gray-50 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-brand-500 focus:border-brand-500 sm:text-sm transition-colors" placeholder="Search products, categories...">
+                    </div>
+                </div>
+
+                <!-- Right Nav -->
+                <div class="flex items-center space-x-6">
+                    <button class="text-gray-500 hover:text-brand-600 transition-colors hidden sm:block">
+                        <i data-lucide="user" class="h-6 w-6"></i>
+                    </button>
+                    <button class="text-gray-500 hover:text-brand-600 transition-colors relative flex items-center" id="cart-button">
+                        <i data-lucide="shopping-cart" class="h-6 w-6"></i>
+                        <span id="cart-count" class="absolute -top-2 -right-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform bg-brand-600 rounded-full">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex flex-col md:flex-row gap-8">
+        
+        <!-- Sidebar / Filters -->
+        <aside class="w-full md:w-64 flex-shrink-0">
+            <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm sticky top-24">
+                <h2 class="text-lg font-bold mb-4 text-gray-900">Categories</h2>
+                <ul class="space-y-2" id="category-list">
+                    <!-- Categories injected by JS -->
+                </ul>
+                
+                <div class="mt-8">
+                    <h2 class="text-lg font-bold mb-4 text-gray-900">Price Range</h2>
+                    <div class="space-y-2 text-sm text-gray-600">
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" class="rounded text-brand-600 focus:ring-brand-500">
+                            <span>Under $50</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" class="rounded text-brand-600 focus:ring-brand-500">
+                            <span>$50 - $100</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" class="rounded text-brand-600 focus:ring-brand-500">
+                            <span>Over $100</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Product Grid Section -->
+        <section class="flex-1">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-bold text-gray-900" id="current-category-title">All Products</h1>
+                <div class="flex items-center space-x-2 text-sm text-gray-500">
+                    <span>Sort by:</span>
+                    <select class="border-gray-300 rounded-md shadow-sm focus:ring-brand-500 focus:border-brand-500 py-1 pl-2 pr-6">
+                        <option>Featured</option>
+                        <option>Price: Low to High</option>
+                        <option>Price: High to Low</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Grid -->
+            <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Products injected by JS -->
+            </div>
+            
+            <!-- Empty State (Hidden by default) -->
+            <div id="empty-state" class="hidden text-center py-12">
+                <i data-lucide="package-x" class="mx-auto h-12 w-12 text-gray-400 mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900">No products found</h3>
+                <p class="text-gray-500">Try adjusting your filters or category selection.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-auto">
+        <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-500">
+            <p>&copy; 2026 WebArena Shop. This is a testing environment.</p>
+        </div>
+    </footer>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Application Logic -->
+    <script>
+        // --- Data ---
+        // Placeholder image generator helper
+        const getPlaceholder = (width, height, bgColor, textColor, text) => 
+            `https://placehold.co/${width}x${height}/${bgColor}/${textColor}?text=${encodeURIComponent(text)}`;
+
+        const products = [
+            // Hiking Boots Category
+            { id: 'b1', name: "Salomon Quest 4 GORE-TEX", price: 230.00, category: "Hiking Boots", rating: 4.8, reviews: 124, image: getPlaceholder(400, 300, '475569', 'ffffff', 'Salomon Boots') },
+            { id: 'b2', name: "Merrell Moab 3 Mid Waterproof", price: 145.00, category: "Hiking Boots", rating: 4.6, reviews: 342, image: getPlaceholder(400, 300, '64748b', 'ffffff', 'Merrell Boots') },
+            { id: 'b3', name: "Columbia Newton Ridge Plus II", price: 100.00, category: "Hiking Boots", rating: 4.5, reviews: 89, image: getPlaceholder(400, 300, '94a3b8', 'ffffff', 'Columbia Boots') },
+            
+            // Backpacks Category
+            { id: 'p1', name: "Osprey Atmos AG 65", price: 340.00, category: "Backpacks", rating: 4.9, reviews: 210, image: getPlaceholder(400, 300, '059669', 'ffffff', 'Osprey Pack') },
+            { id: 'p2', name: "Gregory Baltoro 75", price: 350.00, category: "Backpacks", rating: 4.8, reviews: 156, image: getPlaceholder(400, 300, '10b981', 'ffffff', 'Gregory Pack') },
+            { id: 'p3', name: "Deuter Aircontact Core 60+10", price: 285.00, category: "Backpacks", rating: 4.7, reviews: 92, image: getPlaceholder(400, 300, '34d399', 'ffffff', 'Deuter Pack') },
+            
+            // Tents Category
+            { id: 't1', name: "MSR Hubba Hubba 2-Person", price: 550.00, category: "Tents", rating: 4.9, reviews: 432, image: getPlaceholder(400, 300, 'f59e0b', 'ffffff', 'MSR Tent') },
+            { id: 't2', name: "Big Agnes Copper Spur HV UL2", price: 550.00, category: "Tents", rating: 4.8, reviews: 315, image: getPlaceholder(400, 300, 'fbbf24', 'ffffff', 'Big Agnes Tent') },
+            { id: 't3', name: "REI Co-op Half Dome SL 2+", price: 329.00, category: "Tents", rating: 4.6, reviews: 278, image: getPlaceholder(400, 300, 'fcd34d', 'ffffff', 'REI Tent') },
+
+            { id: 'l3', name: "LuminaTrail Solar Lantern", price: 35.00, category: "Lanterns", rating: 4.6, reviews: 278, image: getPlaceholder(400, 300, 'fad04d', 'ffffff', 'Lumina Trail Solar Lantern') },
+            { id: 'l3', name: "REI Solar Lantern", price: 26.00, category: "Lanterns", rating: 4.6, reviews: 278, image: getPlaceholder(400, 300, 'fad04d', 'ffffff', 'REI Solar Lantern') },
+            { id: 'l3', name: "Osprey Solar Lantern", price: 31.00, category: "Lanterns", rating: 4.6, reviews: 278, image: getPlaceholder(400, 300, 'fad04d', 'ffffff', 'Osprey Solar Lantern') }
+            
+        ];
+
+        let cart = 0;
+        let currentCategory = 'All';
+
+        // --- DOM Elements ---
+        const grid = document.getElementById('product-grid');
+        const categoryList = document.getElementById('category-list');
+        const categoryTitle = document.getElementById('current-category-title');
+        const emptyState = document.getElementById('empty-state');
+        const cartCountDisplay = document.getElementById('cart-count');
+        const toastContainer = document.getElementById('toast-container');
+
+        // --- Initialization ---
+        function init() {
+            lucide.createIcons();
+            renderCategories();
+            renderProducts();
+        }
+
+        // --- Rendering ---
+        function renderCategories() {
+            // Get unique categories
+            const categories = ['All', ...new Set(products.map(p => p.category))];
+            
+            categoryList.innerHTML = categories.map(cat => `
+                <li>
+                    <button 
+                        onclick="filterCategory('${cat}')"
+                        class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors 
+                        ${currentCategory === cat ? 'bg-brand-50 text-brand-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}"
+                        id="cat-btn-${cat.replace(/\s+/g, '-')}"
+                    >
+                        ${cat}
+                        <span class="float-right text-xs text-gray-400 bg-white rounded-full px-2 py-0.5 border border-gray-100">
+                            ${cat === 'All' ? products.length : products.filter(p => p.category === cat).length}
+                        </span>
+                    </button>
+                </li>
+            `).join('');
+        }
+
+        function renderProducts() {
+            const filtered = currentCategory === 'All' 
+                ? products 
+                : products.filter(p => p.category === currentCategory);
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            grid.innerHTML = filtered.map(product => `
+                <article class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col group" data-testid="product-card-${product.id}">
+                    <!-- Image Area -->
+                    <div class="relative aspect-[4/3] overflow-hidden bg-gray-100">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute top-3 right-3">
+                            <button class="bg-white p-1.5 rounded-full text-gray-400 hover:text-red-500 hover:shadow-md transition-all shadow-sm border border-gray-100" aria-label="Add to wishlist">
+                                <i data-lucide="heart" class="h-4 w-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Content Area -->
+                    <div class="p-5 flex flex-col flex-grow">
+                        <div class="text-xs font-semibold text-brand-600 uppercase tracking-wider mb-1">${product.category}</div>
+                        <h3 class="text-lg font-bold text-gray-900 leading-tight mb-2 line-clamp-2" title="${product.name}">${product.name}</h3>
+                        
+                        <!-- Ratings -->
+                        <div class="flex items-center mb-3">
+                            <div class="flex text-yellow-400">
+                                <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+                                <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+                                <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+                                <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+                                <i data-lucide="star-half" class="h-4 w-4 fill-current text-gray-300"></i>
+                            </div>
+                            <span class="text-xs text-gray-500 ml-2">(${product.reviews})</span>
+                        </div>
+
+                        <!-- Price & Actions (Pushed to bottom) -->
+                        <div class="mt-auto pt-4 flex items-center justify-between border-t border-gray-100">
+                            <span class="text-xl font-black text-gray-900">$${product.price.toFixed(2)}</span>
+                            <button 
+                                onclick="addToCart('${product.id}', '${product.name.replace(/'/g, "\\'")}')"
+                                class="bg-brand-600 hover:bg-brand-700 text-white p-2 rounded-lg transition-colors flex items-center gap-2 font-medium text-sm shadow-sm hover:shadow active:scale-95"
+                                aria-label="Add ${product.name} to cart"
+                            >
+                                <i data-lucide="plus" class="h-4 w-4"></i>
+                                <span class="hidden sm:inline">Add</span>
+                            </button>
+                        </div>
+                    </div>
+                </article>
+            `).join('');
+
+            // Re-initialize icons for newly injected HTML
+            lucide.createIcons();
+        }
+
+        // --- Actions ---
+        window.filterCategory = function(category) {
+            currentCategory = category;
+            categoryTitle.textContent = category === 'All' ? 'All Products' : `${category} Collection`;
+            renderCategories(); // Re-render to update active state
+            renderProducts();
+        };
+
+        window.addToCart = function(productId, productName) {
+            // Update state
+            cart++;
+            
+            // Animate cart badge
+            cartCountDisplay.textContent = cart;
+            cartCountDisplay.classList.add('scale-125');
+            setTimeout(() => cartCountDisplay.classList.remove('scale-125'), 200);
+
+            // Show Toast
+            showToast(`Added <b>${productName}</b> to cart.`);
+        };
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'bg-gray-900 text-white px-4 py-3 rounded-lg shadow-xl text-sm flex items-center gap-3 toast-enter pointer-events-auto max-w-xs';
+            toast.innerHTML = `
+                <i data-lucide="check-circle-2" class="h-5 w-5 text-green-400 flex-shrink-0"></i>
+                <div class="flex-1">${message}</div>
+                <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-white">
+                    <i data-lucide="x" class="h-4 w-4"></i>
+                </button>
+            `;
+            
+            toastContainer.appendChild(toast);
+            lucide.createIcons();
+
+            // Remove after 3 seconds
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateY(10px)';
+                    toast.style.transition = 'all 0.3s ease';
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }, 3000);
+        }
+
+        // Run setup when DOM is ready
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
