@@ -61,7 +61,7 @@ def _openrouter_key() -> str:
 MODELS = {
     "nemotron": {"base_url": OPENROUTER, "model_id": "nvidia/nemotron-3-ultra-550b-a55b:free", "key": "openrouter"},
     "haiku":    {"base_url": OPENROUTER, "model_id": "anthropic/claude-haiku-5.5",             "key": "openrouter"},
-    "ollama":   {"base_url": "http://localhost:11434/v1", "model_id": "qwen2.5:7b-instruct",   "key": "ollama"},
+    "ollama":   {"base_url": "http://localhost:11434/v1", "model_id": "qwen2.5:7b",            "key": "ollama"},
 }
 
 # condition -> MEMORY_STORE value ("" means no memory / vanilla)

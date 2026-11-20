@@ -169,6 +169,14 @@ class ScriptBrowserEnv(Env[dict[str, Observation], Action]):
             self.page.client = client  # type: ignore
 
     def get_page_client(self, page: Page) -> CDPSession:
+        # Pages opened by agent actions (e.g. a link that spawns a new tab) do
+        # not get a CDP session attached at setup time, so attach one lazily
+        # here instead of crashing with AttributeError('Page' ... 'client').
+        if getattr(page, "client", None) is None:
+            client = page.context.new_cdp_session(page)
+            if self.text_observation_type == "accessibility_tree":
+                client.send("Accessibility.enable")
+            page.client = client  # type: ignore
         return page.client  # type: ignore
 
     def _get_obs(self) -> dict[str, Observation]:
