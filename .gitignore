@@ -145,6 +145,8 @@ cache/*
 
 # TMP IGNORE
 agent/prompts/jsons/*
+# but keep the instruction file the sweep/run.py actually uses (needed on a fresh clone)
+!agent/prompts/jsons/p_cot_id_actree_2s.json
 log_files/
 config_files*/*0.json
 config_files*/*1.json
@@ -158,3 +160,12 @@ config_files*/*8.json
 config_files*/*9.json
 config_files*/test.json
 .openhands/
+
+# --- eTAMP experiment artifacts ---
+# scratch run output
+test_res/
+# bulky per-run renders (~102MB); parsed data kept in results/sweep/progress.jsonl + summary*
+results/sweep/runs/
+# large raw trajectory renders (keep RESULT.md + the small *_viewable.html evidence)
+results/baseline_clean_taskB/render_1.html
+results/attack_poisoned_taskB/render_1.html
